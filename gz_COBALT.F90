@@ -5880,7 +5880,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('smt_ipa_det',zoo(4)%ipa_det, 0.0)          ! dimensionless
     ! innate prey availability for large tunicates (salps)
     call g_tracer_add_param('lgt_ipa_smp',zoo(5)%ipa_smp, 1.0)          ! dimensionless
-    call g_tracer_add_param('lgt_ipa_lgp',zoo(5)%ipa_lgp, 1.0)         ! dimensionless
+    call g_tracer_add_param('lgt_ipa_lgp',zoo(5)%ipa_lgp, 0.0)         ! dimensionless
     call g_tracer_add_param('lgt_ipa_diaz',zoo(5)%ipa_diaz, 1.0)        ! dimensionless
     call g_tracer_add_param('lgt_ipa_smz',zoo(5)%ipa_smz, 0.5)          ! dimensionless
     call g_tracer_add_param('lgt_ipa_mdz',zoo(5)%ipa_mdz, 0.0)          ! dimensionless
@@ -5898,7 +5898,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('bresp_mdz',zoo(2)%bresp, 0.008 / sperd)             ! s-1
     call g_tracer_add_param('bresp_lgz',zoo(3)%bresp, 0.0032 / sperd)            ! s-1
     call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.05 / sperd)             ! s-1
-    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.03 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.005 / sperd)             ! s-1
 
     call g_tracer_add_param('phi_aresp_smz',zoo(1)%phi_aresp, 0.3)               ! dimensionless
     call g_tracer_add_param('phi_aresp_mdz',zoo(2)%phi_aresp, 0.3)               ! dimensionless
@@ -7836,22 +7836,18 @@ write (stdlogunit, generic_COBALT_nml)
        zoo(m)%jingest_sio2(i,j,k) = ingest_matrix(m,2)*prey_si2n_vec(2)
 
        !
-       ! Large tunicates (m = 5) consuming diazotrophs (1), large
-       ! phytoplankton (2), small phytoplankton (3), bacteria (4),
+       ! Large tunicates (m = 5) consuming diazotrophs (1)
+       ! small phytoplankton (3), bacteria (4),
        ! small zooplankton (5)
        !
 
        m = 5
        sw_fac_denom = (ipa_matrix(m,1)*prey_vec(1))**zoo(m)%nswitch + &
-                      (ipa_matrix(m,2)*prey_vec(2))**zoo(m)%nswitch + &
                       (ipa_matrix(m,3)*prey_vec(3))**zoo(m)%nswitch + &
                       (ipa_matrix(m,4)*prey_vec(4))**zoo(m)%nswitch + &
                       (ipa_matrix(m,5)*prey_vec(5))**zoo(m)%nswitch
        pa_matrix(m,1) = ipa_matrix(m,1)* &
                         ( (ipa_matrix(m,1)*prey_vec(1))**zoo(m)%nswitch / &
-                          (sw_fac_denom+epsln) )**(1.0/zoo(m)%mswitch)
-       pa_matrix(m,2) = ipa_matrix(m,2)* &
-                        ( (ipa_matrix(m,2)*prey_vec(2))**zoo(m)%nswitch / &
                           (sw_fac_denom+epsln) )**(1.0/zoo(m)%mswitch)
        pa_matrix(m,3) = ipa_matrix(m,3)* &
                         ( (ipa_matrix(m,3)*prey_vec(3))**zoo(m)%nswitch / &
@@ -7862,15 +7858,12 @@ write (stdlogunit, generic_COBALT_nml)
        pa_matrix(m,5) = ipa_matrix(m,5)* &
                         ( (ipa_matrix(m,5)*prey_vec(5))**zoo(m)%nswitch / &
                           (sw_fac_denom+epsln) )**(1.0/zoo(m)%mswitch)
-       tot_prey(m) = pa_matrix(m,1)*prey_vec(1) + pa_matrix(m,2)*prey_vec(2) + &
+       tot_prey(m) = pa_matrix(m,1)*prey_vec(1) + &
                      pa_matrix(m,3)*prey_vec(3) + pa_matrix(m,4)*prey_vec(4) + &
                      pa_matrix(m,5)*prey_vec(5)
        ingest_matrix(m,1) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
                      zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,1)*prey_vec(1)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       ingest_matrix(m,2) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
-                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
-                     pa_matrix(m,2)*prey_vec(2)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
        ingest_matrix(m,3) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
                      zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,3)*prey_vec(3)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
@@ -7880,18 +7873,15 @@ write (stdlogunit, generic_COBALT_nml)
        ingest_matrix(m,5) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
                      zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,5)*prey_vec(5)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       zoo(m)%jingest_n(i,j,k) = ingest_matrix(m,1) + ingest_matrix(m,2) + &
+       zoo(m)%jingest_n(i,j,k) = ingest_matrix(m,1) + &
                                  ingest_matrix(m,3) + ingest_matrix(m,4) + &
                                  ingest_matrix(m,5)
        zoo(m)%jingest_p(i,j,k) = ingest_matrix(m,1)*prey_p2n_vec(1) + &
-                                 ingest_matrix(m,2)*prey_p2n_vec(2) + &
                                  ingest_matrix(m,3)*prey_p2n_vec(3) + &
                                  ingest_matrix(m,4)*prey_p2n_vec(4) + &
                                  ingest_matrix(m,5)*prey_p2n_vec(5)
        zoo(m)%jingest_fe(i,j,k) = ingest_matrix(m,1)*prey_fe2n_vec(1) + &
-                                 ingest_matrix(m,2)*prey_fe2n_vec(2) + &
                                  ingest_matrix(m,3)*prey_fe2n_vec(3)
-       zoo(m)%jingest_sio2(i,j,k) = ingest_matrix(m,2)*prey_si2n_vec(2)
 
        ! Calculate total filter feeding by large organisms
        cobalt%total_filter_feeding(i,j,k) = ingest_matrix(2,1) + &
