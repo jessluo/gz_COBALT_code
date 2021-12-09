@@ -5795,7 +5795,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('imax_mdz',zoo(2)%imax, 0.57 / sperd)              ! s-1
     call g_tracer_add_param('imax_lgz',zoo(3)%imax, 0.23 / sperd)              ! s-1
     call g_tracer_add_param('imax_smz',zoo(4)%imax, 3.0 / sperd)               ! s-1 Berline et al. 2011
-    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 0.8*1.1 / sperd)               ! s-1 Henschke et al. 2018
+    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 1.1 / sperd)               ! s-1 Henschke et al. 2018
     call g_tracer_add_param('ki_smz',zoo(1)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.25e-6)                       ! moles N kg-1
@@ -5927,7 +5927,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('agg_mdz',zoo(2)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_lgz',zoo(3)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_smz',zoo(4)%agg, 0.0)                         ! s-1 (moles N kg)-1
-    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.1*1e6/sperd)               ! s-1 (moles N kg)-1
+    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.05*1e6/sperd)               ! s-1 (moles N kg)-1
     !
     !----------------------------------------------------------------------
     ! Partitioning of zooplankton ingestion to other compartments
