@@ -6966,7 +6966,7 @@ write (stdlogunit, generic_COBALT_nml)
     real,dimension(1:NUM_PREY) :: prey_vec,prey_p2n_vec,prey_fe2n_vec,prey_si2n_vec
     real,dimension(1:NUM_ZOO)  :: tot_prey
     real :: tot_prey_hp, sw_fac_denom, basal_respiration, lim_nut_n_ingestion
-    real :: min_cold_lim_temp, cold_lim_max_value, cold_lim_ktemp
+    real :: cold_lim_func
     real :: bact_uptake_ratio, vmax_bact, growth_ratio
     real :: fpoc_btm, log_fpoc_btm
     real :: fe_salt
@@ -7635,17 +7635,16 @@ write (stdlogunit, generic_COBALT_nml)
           zoo(m)%o2lim(i,j,k) = max((cobalt%f_o2(i,j,k) - cobalt%o2_min),0.0)/ &
                                 (cobalt%k_o2 + max(cobalt%f_o2(i,j,k)-cobalt%o2_min,0.0))
        enddo  !}  m
+	   
        cobalt%hp_temp_lim(i,j,k) = exp(cobalt%ktemp_hp*Temp(i,j,k))
        cobalt%hp_o2lim(i,j,k) = max((cobalt%f_o2(i,j,k) - cobalt%o2_min),0.0)/ &
                                 (cobalt%k_o2 + max(cobalt%f_o2(i,j,k)-cobalt%o2_min,0.0))
 
-       ! cold temperature limitation for Salps
-       cold_lim_max_value = 1.0
-       min_cold_lim_temp = -2.0
-       cold_lim_ktemp = 2.2
-       zoo(5)%cold_lim(i,j,k) = cold_lim_max_value * ((Temp(i,j,k) - min_cold_lim_temp)**2.0 / &
-                                ((Temp(i,j,k) - min_cold_lim_temp)**2.0 + cold_lim_ktemp**2.0))
-
+       ! Compute cold temperature limitation for Salps
+       ! cold limitation function only kicks when its value is between 0 and 1 (1-4.5 deg C)
+	   cold_lim_func = 2.0/7.0 ! set so that the function intersects at (1,0) and (4.5,1)
+	   zoo(5)%cold_lim(i,j,k) = min(max(0.0, cold_lim_func * (Temp(i,j,k) - 1.0)), 1.0)
+       
        ! Prey vectors for ingestion and loss calculations
        ! (note: ordering of phytoplankton must be consistent with
        !  DIAZO, LARGE, SMALL ordering inherited from TOPAZ)
