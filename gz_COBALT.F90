@@ -5891,8 +5891,8 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('bresp_smz',zoo(1)%bresp, 0.9*0.020 / sperd)         ! s-1
     call g_tracer_add_param('bresp_mdz',zoo(2)%bresp, 0.008 / sperd)             ! s-1
     call g_tracer_add_param('bresp_lgz',zoo(3)%bresp, 0.0032 / sperd)            ! s-1
-    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.059 / sperd)             ! s-1
-    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.4*0.035 / sperd)         ! s-1
+    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.047 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.75*0.011 / sperd)         ! s-1
 
     call g_tracer_add_param('phi_aresp_smz',zoo(1)%phi_aresp, 0.3)               ! dimensionless
     call g_tracer_add_param('phi_aresp_mdz',zoo(2)%phi_aresp, 0.3)               ! dimensionless
@@ -5921,7 +5921,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('agg_mdz',zoo(2)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_lgz',zoo(3)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_smt',zoo(4)%agg, 0.0)                         ! s-1 (moles N kg)-1
-    call g_tracer_add_param('agg_lgt',zoo(5)%agg, 0.0)                         ! s-1 (moles N kg)-1
+    call g_tracer_add_param('agg_lgt',zoo(5)%agg, 0.082*1e6/sperd)               ! s-1 (moles N kg)-1
     !
     !----------------------------------------------------------------------
     ! Partitioning of zooplankton ingestion to other compartments
