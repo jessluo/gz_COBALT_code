@@ -5897,7 +5897,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('phi_aresp_smz',zoo(1)%phi_aresp, 0.3)               ! dimensionless
     call g_tracer_add_param('phi_aresp_mdz',zoo(2)%phi_aresp, 0.3)               ! dimensionless
     call g_tracer_add_param('phi_aresp_lgz',zoo(3)%phi_aresp, 0.3)               ! dimensionless
-    call g_tracer_add_param('phi_aresp_smt',zoo(4)%phi_aresp, 0.25)               ! dimensionless
+    call g_tracer_add_param('phi_aresp_smt',zoo(4)%phi_aresp, 0.15)               ! dimensionless
     call g_tracer_add_param('phi_aresp_lgt',zoo(5)%phi_aresp, 0.15)               ! dimensionless
 
     call g_tracer_add_param('assim_eff_max_smz',zoo(1)%assim_eff_max, 0.7)       ! dimensionless
@@ -5914,7 +5914,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
-    call g_tracer_add_param('kae_smt',zoo(4)%kae, 1.41e-6)                     ! moles N kg-1
+    call g_tracer_add_param('kae_smt',zoo(4)%kae, 1.22e-6)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgt',zoo(5)%kae, 2.63e-6)                     ! moles N kg-1
 
     call g_tracer_add_param('agg_smz',zoo(1)%agg, 0.0)                         ! s-1 (moles N kg)-1
