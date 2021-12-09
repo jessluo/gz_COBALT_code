@@ -5868,13 +5868,13 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('assim_eff_max_smz',zoo(1)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_mdz',zoo(2)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_lgz',zoo(3)%assim_eff_max, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.8)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.8)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_smz',zoo(1)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_mdz',zoo(2)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_lgz',zoo(3)%assim_eff_min, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.3)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.3)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.2)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.2)       ! dimensionless
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
@@ -9461,6 +9461,7 @@ write (stdlogunit, generic_COBALT_nml)
 !          phyto(SMALL)%jprod_po4(i,j,1)) * rho_dzt(i,j,1)
 ! previously computed in COBALT
        cobalt%jprod_ptot_100(i,j) = cobalt%jprod_po4(i,j,1) * rho_dzt(i,j,1)
+
        do n = 1, NUM_PHYTO  !{
           phyto(n)%jprod_n_100(i,j) = phyto(n)%jprod_n(i,j,1) * rho_dzt(i,j,1)
           phyto(n)%jprod_n_new_100(i,j) = phyto(n)%juptake_no3(i,j,1) * rho_dzt(i,j,1)
@@ -9472,6 +9473,7 @@ write (stdlogunit, generic_COBALT_nml)
 ! CAS: added juptake_po4_100
           phyto(n)%juptake_po4_100(i,j) = phyto(n)%juptake_po4(i,j,1) * rho_dzt(i,j,1)
        enddo   !} n
+
        phyto(DIAZO)%jprod_n_n2_100(i,j) = phyto(DIAZO)%juptake_n2(i,j,1) * rho_dzt(i,j,1)
        phyto(SMALL)%jvirloss_n_100(i,j) = phyto(SMALL)%jvirloss_n(i,j,1) * rho_dzt(i,j,1)
        phyto(SMALL)%jaggloss_n_100(i,j) = phyto(SMALL)%jaggloss_n(i,j,1) * rho_dzt(i,j,1)
@@ -9480,20 +9482,15 @@ write (stdlogunit, generic_COBALT_nml)
        cobalt%jprod_diat_100(i,j) = phyto(LARGE)%jprod_n(i,j,1)*phyto(LARGE)%silim(i,j,1)*rho_dzt(i,j,1)
 ! added juptake_sio4_100 (large only)
        phyto(LARGE)%juptake_sio4_100(i,j) = phyto(LARGE)%juptake_sio4(i,j,1) * rho_dzt(i,j,1)
+
        do n = 1, NUM_ZOO  !{
           zoo(n)%jprod_n_100(i,j) = zoo(n)%jprod_n(i,j,1) * rho_dzt(i,j,1)
           zoo(n)%jingest_n_100(i,j) = zoo(n)%jingest_n(i,j,1) * rho_dzt(i,j,1)
           zoo(n)%jremin_n_100(i,j) = zoo(n)%jprod_nh4(i,j,1) * rho_dzt(i,j,1)
           zoo(n)%f_n_100(i,j) = zoo(n)%f_n(i,j,1) * rho_dzt(i,j,1)
-       enddo   !} n
-
-       do n = 1,2  !{
           zoo(n)%jzloss_n_100(i,j) = zoo(n)%jzloss_n(i,j,1) * rho_dzt(i,j,1)
           zoo(n)%jprod_don_100(i,j) = (zoo(n)%jprod_ldon(i,j,1) + zoo(n)%jprod_sldon(i,j,1) + &
              zoo(n)%jprod_srdon(i,j,1))  * rho_dzt(i,j,1)
-       enddo   !} n
-
-       do n = 2,3  !{
           zoo(n)%jhploss_n_100(i,j) = zoo(n)%jhploss_n(i,j,1) * rho_dzt(i,j,1)
           zoo(n)%jprod_ndet_100(i,j) = zoo(n)%jprod_ndet(i,j,1) * rho_dzt(i,j,1)
        enddo   !} n
@@ -9568,6 +9565,7 @@ write (stdlogunit, generic_COBALT_nml)
 ! CAS: added juptake_po4_100
                 phyto(n)%juptake_po4_100(i,j) = phyto(n)%juptake_po4_100(i,j) + phyto(n)%juptake_po4(i,j,k)*rho_dzt(i,j,k)
              enddo !} n
+
              phyto(DIAZO)%jprod_n_n2_100(i,j) = phyto(DIAZO)%jprod_n_n2_100(i,j) + &
                  phyto(DIAZO)%juptake_n2(i,j,k)*rho_dzt(i,j,k)
              phyto(SMALL)%jvirloss_n_100(i,j) = phyto(SMALL)%jvirloss_n_100(i,j) + &
@@ -9591,16 +9589,10 @@ write (stdlogunit, generic_COBALT_nml)
                 zoo(n)%jremin_n_100(i,j) = zoo(n)%jremin_n_100(i,j) + zoo(n)%jprod_nh4(i,j,k)* &
                    rho_dzt(i,j,k)
                 zoo(n)%f_n_100(i,j) = zoo(n)%f_n_100(i,j) + zoo(n)%f_n(i,j,k)*rho_dzt(i,j,k)
-             enddo !} n
-
-             do n = 1,2 !{
                 zoo(n)%jzloss_n_100(i,j) = zoo(n)%jzloss_n_100(i,j) + zoo(n)%jzloss_n(i,j,k)* &
                    rho_dzt(i,j,k)
                 zoo(n)%jprod_don_100(i,j) = zoo(n)%jprod_don_100(i,j) + (zoo(n)%jprod_ldon(i,j,k) + &
                    zoo(n)%jprod_sldon(i,j,k) + zoo(n)%jprod_srdon(i,j,k))*rho_dzt(i,j,k)
-             enddo !} n
-
-             do n = 2,3 !{
                 zoo(n)%jhploss_n_100(i,j) = zoo(n)%jhploss_n_100(i,j) + zoo(n)%jhploss_n(i,j,k)* &
                    rho_dzt(i,j,k)
                 zoo(n)%jprod_ndet_100(i,j) = zoo(n)%jprod_ndet_100(i,j) + zoo(n)%jprod_ndet(i,j,k)* &
@@ -9701,16 +9693,10 @@ write (stdlogunit, generic_COBALT_nml)
                zoo(n)%jremin_n_100(i,j) = zoo(n)%jremin_n_100(i,j) + zoo(n)%jprod_nh4(i,j,k_100)* &
                  drho_dzt
                zoo(n)%f_n_100(i,j) = zoo(n)%f_n_100(i,j) + zoo(n)%f_n(i,j,k_100)*drho_dzt
-           enddo !} n
-
-           do n = 1,2 !{
                zoo(n)%jzloss_n_100(i,j) = zoo(n)%jzloss_n_100(i,j) + zoo(n)%jzloss_n(i,j,k_100)* &
                  drho_dzt
                zoo(n)%jprod_don_100(i,j) = zoo(n)%jprod_don_100(i,j) + (zoo(n)%jprod_ldon(i,j,k_100) + &
                  zoo(n)%jprod_sldon(i,j,k_100) + zoo(n)%jprod_srdon(i,j,k_100))*drho_dzt
-           enddo !} n
-
-           do n = 2,3 !{
                zoo(n)%jhploss_n_100(i,j) = zoo(n)%jhploss_n_100(i,j) + zoo(n)%jhploss_n(i,j,k_100)* &
                  drho_dzt
                zoo(n)%jprod_ndet_100(i,j) = zoo(n)%jprod_ndet_100(i,j) + zoo(n)%jprod_ndet(i,j,k_100)* &
@@ -13245,14 +13231,8 @@ write (stdlogunit, generic_COBALT_nml)
        allocate(zoo(n)%jingest_n_100(isd:ied,jsd:jed))    ; zoo(n)%jingest_n_100    = 0.0
        allocate(zoo(n)%jremin_n_100(isd:ied,jsd:jed))     ; zoo(n)%jremin_n_100     = 0.0
        allocate(zoo(n)%f_n_100(isd:ied,jsd:jed))          ; zoo(n)%f_n_100          = 0.0
-    enddo
-
-   do n = 1,2
        allocate(zoo(n)%jzloss_n_100(isd:ied,jsd:jed))     ; zoo(n)%jzloss_n_100     = 0.0
        allocate(zoo(n)%jprod_don_100(isd:ied,jsd:jed))    ; zoo(n)%jprod_don_100    = 0.0
-   enddo
-
-   do n = 2,3
        allocate(zoo(n)%jhploss_n_100(isd:ied,jsd:jed))    ; zoo(n)%jhploss_n_100     = 0.0
        allocate(zoo(n)%jprod_ndet_100(isd:ied,jsd:jed))   ; zoo(n)%jprod_ndet_100    = 0.0
    enddo
@@ -13751,14 +13731,8 @@ write (stdlogunit, generic_COBALT_nml)
        deallocate(zoo(n)%jingest_n_100)
        deallocate(zoo(n)%jremin_n_100)
        deallocate(zoo(n)%f_n_100)
-    enddo
-
-    do n = 1,2
        deallocate(zoo(n)%jzloss_n_100)
        deallocate(zoo(n)%jprod_don_100)
-    enddo
-
-    do n = 2,3
        deallocate(zoo(n)%jhploss_n_100)
        deallocate(zoo(n)%jprod_ndet_100)
     enddo
