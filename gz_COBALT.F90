@@ -5920,14 +5920,14 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
-    call g_tracer_add_param('kae_smz',zoo(4)%kae, 1.0e-5)                      ! moles N kg-1
-    call g_tracer_add_param('kae_lgz',zoo(5)%kae, 1.0e-5)                      ! moles N kg-1
+    call g_tracer_add_param('kae_smz',zoo(4)%kae, 3.25e-6)                     ! moles N kg-1
+    call g_tracer_add_param('kae_lgz',zoo(5)%kae, 2.0e-6)                      ! moles N kg-1
 
     call g_tracer_add_param('agg_smz',zoo(1)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_mdz',zoo(2)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_lgz',zoo(3)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_smz',zoo(4)%agg, 0.0)                         ! s-1 (moles N kg)-1
-    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.01*1e6/sperd)                  ! s-1 (moles N kg)-1
+    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.05*1e6/sperd)                  ! s-1 (moles N kg)-1
     !
     !----------------------------------------------------------------------
     ! Partitioning of zooplankton ingestion to other compartments
