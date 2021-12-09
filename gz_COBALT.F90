@@ -365,7 +365,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
 
   type zooplankton
     real ::  &
-	        imax,             & ! maximum ingestion rate (sec-1)
+          imax,             & ! maximum ingestion rate (sec-1)
           ki,               & ! half-sat for ingestion (moles N m-3)
           nswitch,          & ! switching parameter (dimensionless)zoo(n)%q_p_2_n(i,j,k)
           mswitch,          & ! switching parameter (dimensionless)
@@ -380,7 +380,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           phi_sldop,        & ! fraction of unassimilated P to semi-labile dop
           phi_srdop,        & ! fraction of unassimilated P to semi-refractory dop
           phi_nh4,          & ! fraction of ingested N to nh4 due to ingestion-related metabolism
-          phi_po4,	        & ! fraction of ingested N to po4 due to ingestion-related metabolism
+          phi_po4,          & ! fraction of ingested N to po4 due to ingestion-related metabolism
           assim_eff_max,    & ! zooplankton maximum assimilation efficiency
           assim_eff_min,    & ! zooplankton minimum assimilation efficiency
           kae,              & ! half-saturation constant for assimilation efficiency (moles N m-3)
@@ -391,8 +391,8 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           ipa_smz,          & ! innate prey availability of small zooplankton
           ipa_mdz,          & ! innate prey availability of large zooplankton
           ipa_lgz,          & ! innate prey availability of x-large zooplankton
-	    	  ipa_smt,          & ! innate prey availability of small tunicates (appendicularians)
-	     	  ipa_lgt,          & ! innate prey availability of large tunicates (salps)
+          ipa_smt,          & ! innate prey availability of small tunicates (appendicularians)
+          ipa_lgt,          & ! innate prey availability of large tunicates (salps)
           ipa_det,          & ! innate prey availability of detritus
           ipa_bact,         & ! innate prey availability for bacteria
           agg                 ! zooplankton aggregation loss rate
@@ -410,7 +410,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           f_n,              & ! zooplankton biomass
           assim_eff,        & ! zooplankton assimilation efficiency
           jzloss_n,         & ! Losses of n due to consumption by other zooplankton groups
-          jzloss_p,	        & ! Losses of p due to consumption by other zooplankton groups
+          jzloss_p,         & ! Losses of p due to consumption by other zooplankton groups
           jhploss_n,        & ! Losses of n due to consumption by unresolved higher preds
           jhploss_p,        & ! Losses of p due to consumption by unresolved higher preds
           jaggloss_n,       & ! Losses of n due to aggregation (mortality not due to consumption)
@@ -418,7 +418,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           jingest_n,        & ! Total ingestion of n
           jingest_p,        & ! Total ingestion of p
           jingest_sio2,     & ! Total ingestion of silicate
-          jingest_fe,	      & ! Total ingestion of iron
+          jingest_fe,       & ! Total ingestion of iron
           jprod_ndet,       & ! production of nitrogen detritus by zooplankton group
           jprod_pdet,       & ! production of phosphorous detritus by zooplankton group
           jprod_ldon,       & ! production of labile dissolved organic N by zooplankton group
@@ -427,9 +427,9 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           jprod_srdop,      & ! production of semi-refractory dissolved organic P by zooplankton group
           jprod_sldon,      & ! production of semi-labile dissolved organic N by zooplankton group
           jprod_sldop,      & ! production of semi-labile dissolved organic P by zooplankton group
-          jprod_fed,	      & ! production of dissolved iron
+          jprod_fed,        & ! production of dissolved iron
           jprod_fedet,      & ! production of iron detritus
-          jprod_sidet,	    & ! production of silica detritus
+          jprod_sidet,      & ! production of silica detritus
           jprod_sio4,       & ! production of silicate via rapid dissolution at surface
           jprod_po4,        & ! phosphate production by zooplankton
           jprod_nh4,        & ! ammonia production by zooplankton
@@ -437,7 +437,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           o2lim,            & ! oxygen limitation of zooplankton activity
           temp_lim,         & ! Temperature limitation
           cold_lim            ! Temperature limitation due to cold temperatures
-    integer ::		    &
+    integer ::              &
           id_jzloss_n       = -1, &
           id_jzloss_p       = -1, &
           id_jhploss_n      = -1, &
@@ -647,7 +647,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           ki_hp,            & ! unresolved higher pred. half-sat
           ktemp_hp,         & ! temperature dependence for higher predators
           coef_hp,          & ! scaling between unresolved preds and available prey
-          nswitch_hp,	    & ! higher predator switching behavior
+          nswitch_hp,       & ! higher predator switching behavior
           mswitch_hp,       & ! higher predator switching behavior
           hp_ipa_smp,       & ! innate prey availability of small phytos to hp's
           hp_ipa_lgp,       & ! "  "  "  "  "  "  "  "  "   large phytos to hp's
@@ -673,7 +673,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           mask_z_sat_calc
 
      real, dimension(:,:,:), ALLOCATABLE ::  &
-          f_alk,&				! Other prognostic variables
+          f_alk,&                           ! Other prognostic variables
           f_cadet_arag,&
           f_cadet_calc,&
           f_dic,&
@@ -5791,16 +5791,16 @@ write (stdlogunit, generic_COBALT_nml)
     ! Zooplankton ingestion parameterization and temperature dependence
     !-----------------------------------------------------------------------
     !
-    call g_tracer_add_param('imax_smz',zoo(1)%imax, 1.42 / sperd)          ! s-1
+    call g_tracer_add_param('imax_smz',zoo(1)%imax, 1.42 / sperd)              ! s-1
     call g_tracer_add_param('imax_mdz',zoo(2)%imax, 0.57 / sperd)              ! s-1
     call g_tracer_add_param('imax_lgz',zoo(3)%imax, 0.23 / sperd)              ! s-1
     call g_tracer_add_param('imax_smz',zoo(4)%imax, 3.0 / sperd)               ! s-1 Berline et al. 2011
-    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 2.0 / sperd)               ! s-1 von Harbou et al. 2009
+    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 0.8 / sperd)               ! s-1
     call g_tracer_add_param('ki_smz',zoo(1)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.25e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_smt',zoo(4)%ki, 2.7e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 5.0e-6)                       ! moles N kg-1
+    call g_tracer_add_param('ki_smt',zoo(4)%ki, 3.25e-6)                       ! moles N kg-1
+    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 2.0e-6)                       ! moles N kg-1
     call g_tracer_add_param('ktemp_smz',zoo(1)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_mdz',zoo(2)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_lgz',zoo(3)%ktemp, 0.063)                   ! C-1
@@ -5920,7 +5920,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
-    call g_tracer_add_param('kae_smz',zoo(4)%kae, 1.0e-4)                      ! moles N kg-1
+    call g_tracer_add_param('kae_smz',zoo(4)%kae, 0.75e-4)                      ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(5)%kae, 5.0e-6)                      ! moles N kg-1
 
     call g_tracer_add_param('agg_smz',zoo(1)%agg, 0.0)                         ! s-1 (moles N kg)-1
