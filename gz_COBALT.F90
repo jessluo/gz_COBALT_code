@@ -5897,8 +5897,8 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('bresp_smz',zoo(1)%bresp, 0.9*0.020 / sperd)         ! s-1
     call g_tracer_add_param('bresp_mdz',zoo(2)%bresp, 0.008 / sperd)             ! s-1
     call g_tracer_add_param('bresp_lgz',zoo(3)%bresp, 0.0032 / sperd)            ! s-1
-    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.05 / sperd)             ! s-1
-    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.02 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.050 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.8*0.027 / sperd)             ! s-1
 
     call g_tracer_add_param('phi_aresp_smz',zoo(1)%phi_aresp, 0.3)               ! dimensionless
     call g_tracer_add_param('phi_aresp_mdz',zoo(2)%phi_aresp, 0.3)               ! dimensionless
@@ -5927,7 +5927,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('agg_mdz',zoo(2)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_lgz',zoo(3)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_smz',zoo(4)%agg, 0.0)                         ! s-1 (moles N kg)-1
-    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.075*1e6/sperd)                  ! s-1 (moles N kg)-1
+    call g_tracer_add_param('agg_lgz',zoo(5)%agg, 0.1*1e6/sperd)               ! s-1 (moles N kg)-1
     !
     !----------------------------------------------------------------------
     ! Partitioning of zooplankton ingestion to other compartments
@@ -7635,16 +7635,15 @@ write (stdlogunit, generic_COBALT_nml)
           zoo(m)%o2lim(i,j,k) = max((cobalt%f_o2(i,j,k) - cobalt%o2_min),0.0)/ &
                                 (cobalt%k_o2 + max(cobalt%f_o2(i,j,k)-cobalt%o2_min,0.0))
        enddo  !}  m
-	   
        cobalt%hp_temp_lim(i,j,k) = exp(cobalt%ktemp_hp*Temp(i,j,k))
        cobalt%hp_o2lim(i,j,k) = max((cobalt%f_o2(i,j,k) - cobalt%o2_min),0.0)/ &
                                 (cobalt%k_o2 + max(cobalt%f_o2(i,j,k)-cobalt%o2_min,0.0))
 
        ! Compute cold temperature limitation for Salps
        ! cold limitation function only kicks when its value is between 0 and 1 (1-4.5 deg C)
-	   cold_lim_func = 2.0/7.0 ! set so that the function intersects at (1,0) and (4.5,1)
-	   zoo(5)%cold_lim(i,j,k) = min(max(0.0, cold_lim_func * (Temp(i,j,k) - 1.0)), 1.0)
-       
+       cold_lim_func = 2.0/7.0 ! set so that the function intersects at (1,0) and (4.5,1)
+       zoo(5)%cold_lim(i,j,k) = min(max(0.0, cold_lim_func * (Temp(i,j,k) - 1.0)), 1.0)
+
        ! Prey vectors for ingestion and loss calculations
        ! (note: ordering of phytoplankton must be consistent with
        !  DIAZO, LARGE, SMALL ordering inherited from TOPAZ)
