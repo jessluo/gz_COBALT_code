@@ -5795,12 +5795,12 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('imax_mdz',zoo(2)%imax, 0.57 / sperd)              ! s-1
     call g_tracer_add_param('imax_lgz',zoo(3)%imax, 0.23 / sperd)              ! s-1
     call g_tracer_add_param('imax_smz',zoo(4)%imax, 3.0 / sperd)               ! s-1 Berline et al. 2011
-    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 1.1 / sperd)               ! s-1 Henschke et al. 2018
+    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 0.8*1.1 / sperd)               ! s-1 Henschke et al. 2018
     call g_tracer_add_param('ki_smz',zoo(1)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_smt',zoo(4)%ki, 3.25e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 2.0e-6)                        ! moles N kg-1
+    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 2.5e-6)                        ! moles N kg-1
     call g_tracer_add_param('ktemp_smz',zoo(1)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_mdz',zoo(2)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_lgz',zoo(3)%ktemp, 0.063)                   ! C-1
