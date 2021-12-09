@@ -5799,8 +5799,8 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('ki_smz',zoo(1)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.25e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_smt',zoo(4)%ki, 1.25e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 1.25e-6)                       ! moles N kg-1
+    call g_tracer_add_param('ki_smt',zoo(4)%ki, 3.25e-6)                       ! moles N kg-1
+    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 2.0e-6)                       ! moles N kg-1
     call g_tracer_add_param('ktemp_smz',zoo(1)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_mdz',zoo(2)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_lgz',zoo(3)%ktemp, 0.063)                   ! C-1
@@ -5909,13 +5909,13 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('assim_eff_max_smz',zoo(1)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_mdz',zoo(2)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_lgz',zoo(3)%assim_eff_max, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.8)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.8)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.5)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.5)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_smz',zoo(1)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_mdz',zoo(2)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_lgz',zoo(3)%assim_eff_min, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.2)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.2)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.5)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.5)       ! dimensionless
 
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
