@@ -367,20 +367,23 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
     real ::  &
 	  imax,             & ! maximum ingestion rate (sec-1)
           ki,               & ! half-sat for ingestion (moles N m-3)
-          gge_max,          & ! max gross growth efficiciency (approached as i >> bresp, dimensionless)
           nswitch,          & ! switching parameter (dimensionless)
           mswitch,          & ! switching parameter (dimensionless)
           bresp,            & ! basal respiration rate (sec-1)
           ktemp,            & ! temperature dependence of zooplankton rates (C-1)
-          phi_det,          & ! fraction of ingested N to detritus
-          phi_ldon,         & ! fraction of ingested N/P to labile don
-          phi_sldon,        & ! fraction of ingested N/P to semi-labile don
-          phi_srdon,        & ! fraction of ingested N/P to semi-refractory don
-          phi_ldop,         & ! fraction of ingested N/P to labile dop
-          phi_sldop,        & ! fraction of ingested N/P to semi-labile dop
-          phi_srdop,        & ! fraction of ingested N/P to semi-refractory dop
+          phi_aresp,        & ! fraction of ingested N to active (food-dependent) respiration
+          phi_det,          & ! fraction of unassimilated N to detritus
+          phi_ldon,         & ! fraction of unassimilated N to labile don
+          phi_sldon,        & ! fraction of unassimilated N to semi-labile don
+          phi_srdon,        & ! fraction of unassimilated N to semi-refractory don
+          phi_ldop,         & ! fraction of unassimilated P to labile dop
+          phi_sldop,        & ! fraction of unassimilated P to semi-labile dop
+          phi_srdop,        & ! fraction of unassimilated P to semi-refractory dop
           phi_nh4,          & ! fraction of ingested N to nh4 due to ingestion-related metabolism
-          phi_po4,	    & ! fraction of ingested N to po4 due to ingestion-related metabolism
+          phi_po4,	        & ! fraction of ingested N to po4 due to ingestion-related metabolism
+          assim_eff_max,    & ! zooplankton maximum assimilation efficiency
+          assim_eff_min,    & ! zooplankton minimum assimilation efficiency
+          kae,              & ! half-saturation constant for assimilation efficiency (moles N m-3)
           q_p_2_n,          & ! p:n ratio of zooplankton
           ipa_smp,          & ! innate prey availability of low-light adapt. small phytos
           ipa_lgp,          & ! innate prey availability of large phytoplankton
@@ -403,14 +406,15 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           f_n_100
     real, ALLOCATABLE, dimension(:,:,:) :: &
           f_n,              & ! zooplankton biomass
+          assim_eff,        & ! zooplankton assimilation efficiency
           jzloss_n,         & ! Losses of n due to consumption by other zooplankton groups
-          jzloss_p,	    & ! Losses of p due to consumption by other zooplankton groups
+          jzloss_p,	        & ! Losses of p due to consumption by other zooplankton groups
           jhploss_n,        & ! Losses of n due to consumption by unresolved higher preds
-          jhploss_p,	    & ! Losses of p due to consumption by unresolved higher preds
+          jhploss_p,        & ! Losses of p due to consumption by unresolved higher preds
           jingest_n,        & ! Total ingestion of n
           jingest_p,        & ! Total ingestion of p
           jingest_sio2,     & ! Total ingestion of silicate
-          jingest_fe,	    & ! Total ingestion of iron
+          jingest_fe,	      & ! Total ingestion of iron
           jprod_ndet,       & ! production of nitrogen detritus by zooplankton group
           jprod_pdet,       & ! production of phosphorous detritus by zooplankton group
           jprod_ldon,       & ! production of labile dissolved organic N by zooplankton group
@@ -419,7 +423,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           jprod_srdop,      & ! production of semi-refractory dissolved organic P by zooplankton group
           jprod_sldon,      & ! production of semi-labile dissolved organic N by zooplankton group
           jprod_sldop,      & ! production of semi-labile dissolved organic P by zooplankton group
-          jprod_fed,	    & ! production of dissolved iron
+          jprod_fed,	      & ! production of dissolved iron
           jprod_fedet,      & ! production of iron detritus
           jprod_sidet,	    & ! production of silica detritus
           jprod_sio4,       & ! production of silicate via rapid dissolution at surface
@@ -427,7 +431,8 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           jprod_nh4,        & ! ammonia production by zooplankton
           jprod_n,          & ! zooplankton production
           o2lim,            & ! oxygen limitation of zooplankton activity
-          temp_lim            ! Temperature limitation
+          temp_lim,         & ! Temperature limitation
+          cold_lim            ! Temperature limitation due to cold temperatures
     integer ::		    &
           id_jzloss_n       = -1, &
           id_jzloss_p       = -1, &
@@ -454,6 +459,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           id_jprod_n        = -1, &
           id_o2lim          = -1, &
           id_temp_lim       = -1, &
+          id_cold_lim       = -1, &
           id_jprod_n_100    = -1, &
           id_jingest_n_100  = -1, &
           id_jzloss_n_100   = -1, &
@@ -461,15 +467,17 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
           id_jprod_ndet_100 = -1, &
           id_jprod_don_100  = -1, &
           id_jremin_n_100   = -1, &
-          id_f_n_100        = -1
+          id_f_n_100        = -1, &
+          id_assim_eff      = -1
   end type zooplankton
 
   type bacteria
     real ::  &
           mu_max,           & ! maximum bacterial growth rate (sec-1)
           k_ldon,           & ! half-sat for nitrogen-limited growth (mmoles N m-3)
-          gge_max,          & ! max gross growth efficiciency (dimensionless)
           bresp,            & ! basal respiration rate (sec-1)
+          phi_aresp,        & ! fraction of ingested N to active (food-dependent) respiration
+          assim_eff,        & ! bacteria assimilation efficiency
           ktemp,            & ! temperature dependence of bacterial rates (C-1)
           vir,              & ! virus-driven loss rate for bacteria (sec-1 mmole N m-3)
           q_p_2_n             ! p:n ratio for bacteria
@@ -542,7 +550,7 @@ namelist /generic_COBALT_nml/ do_14c, co2_calc, debug, do_nh3_atm_ocean_exchange
 
      logical  ::       &
           init,             &                  ! If tracers should be initializated
-          force_update_fluxes,&                ! If OCMIP2 tracers fluxes should be updated every coupling timesteps
+          force_update_fluxes, &               ! If OCMIP2 tracers fluxes should be updated every coupling timesteps
                                                !    when update_from_source is not called every coupling timesteps
                                                !    as is the case with MOM6  THERMO_SPANS_COUPLING option
           p_2_n_static,     &                  ! If P:N is fixed in phytoplankton
@@ -2595,6 +2603,18 @@ write (stdlogunit, generic_COBALT_nml)
 
     vardesc_temp = vardesc("temp_lim_Lgt","Temperature limitation of large tunicates",'h','L','s','dimensionless','f')
     zoo(5)%id_temp_lim = register_diag_field(package_name, vardesc_temp%name, axes(1:3),&
+         init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
+
+    vardesc_temp = vardesc("cold_lim_Lgt","Cold temperature limitation of large tunicates",'h','L','s','dimensionless','f')
+    zoo(5)%id_cold_lim = register_diag_field(package_name, vardesc_temp%name, axes(1:3),&
+         init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
+
+    vardesc_temp = vardesc("AE_smt","Assimilation efficiency of small tunicates",'h','L','s','dimensionless','f')
+    zoo(4)%id_assim_eff = register_diag_field(package_name, vardesc_temp%name, axes(1:3),&
+         init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
+
+    vardesc_temp = vardesc("AE_lgt","Assimilation efficiency of large tunicates",'h','L','s','dimensionless','f')
+    zoo(5)%id_assim_eff = register_diag_field(package_name, vardesc_temp%name, axes(1:3),&
          init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
 
     !
@@ -5688,16 +5708,9 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('q_p_2_n_smz',zoo(1)%q_p_2_n, 1.0/18.0)          ! mol P mol N-1
     call g_tracer_add_param('q_p_2_n_mdz',zoo(2)%q_p_2_n, 1.0/16.0)          ! mol P mol N-1
     call g_tracer_add_param('q_p_2_n_lgz',zoo(3)%q_p_2_n, 1.0/16.0)          ! mol P mol N-1
-	! JYL: Few data points for salps/appendicularian stoichiometry.
-	! Gorsky et al. 1998 reports 5.3 C:N ratio for Oikiopleura dioica, 3.6 for O. longicauda, and 4.6 for Fritillarids, but no P
-	! Also C:N = 3.7 for Ihlea punctata (salp)
-  ! Lombard et al. 2009 O. dioica C:N = 4.08 +/- 0.36
-	! Alcaraz et al. 2014 reports 51:4.6:1 C:N:P for Salpa thompsonii (though 106:8.2:1 for copepods)
-	! Madin & Purcell 1992 report 5.3 +/- 1.7 for C:N for Cyclosalpa bakerii tissue
-	! Iguchi & Ikeda 2004 report means of 3.9 and 3.96 C:N for Salpa thompsonii (agg and sol) - I think Alcaraz is an outlier
-	! are these supposed to be N:P ratios assuming Redfield C:N?? assume C:N for apps and salps = 4.15
-    call g_tracer_add_param('q_p_2_n_smt',zoo(4)%q_p_2_n, 1.0/10.0)          ! mol P mol N-1
-    call g_tracer_add_param('q_p_2_n_lgt',zoo(5)%q_p_2_n, 1.0/10.0)           ! mol P mol N-1
+    ! tunicate N:P ratios are unknown; assume Redfield
+    call g_tracer_add_param('q_p_2_n_smt',zoo(4)%q_p_2_n, 1.0/16.0)          ! mol P mol N-1
+    call g_tracer_add_param('q_p_2_n_lgt',zoo(5)%q_p_2_n, 1.0/16.0)          ! mol P mol N-1
     !
     !-----------------------------------------------------------------------
     ! Bacteria Stoichiometry - presently static
@@ -5762,8 +5775,9 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('mu_max_bact',bact(1)%mu_max, 1.0/sperd )          ! s-1
     call g_tracer_add_param('k_ldon_bact', bact(1)%k_ldon,  5.0e-7)            ! mol ldon kg-1
     call g_tracer_add_param('ktemp_bact', bact(1)%ktemp, 0.063)                ! C-1
-    call g_tracer_add_param('gge_max_bact',bact(1)%gge_max,0.4)                ! dimensionless
     call g_tracer_add_param('bresp_bact',bact(1)%bresp, 0.0075/sperd)          ! s-1
+    call g_tracer_add_param('phi_aresp_bact',bact(1)%phi_aresp, 0.6)           ! dimensionless
+    call g_tracer_add_param('assim_eff_bact',bact(1)%assim_eff, 1.0)           ! dimensionless
     !
     !-----------------------------------------------------------------------
     ! Zooplankton switching and prey preference parameters
@@ -5782,7 +5796,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('mswitch_smt',zoo(4)%mswitch, 2.0)          ! dimensionless
     call g_tracer_add_param('mswitch_lgt',zoo(5)%mswitch, 2.0)          ! dimensionless
     ! innate prey availability for small zooplankton
-    call g_tracer_add_param('smz_ipa_smp',zoo(1)%ipa_smp, 1.0)    ! dimensionless
+    call g_tracer_add_param('smz_ipa_smp',zoo(1)%ipa_smp, 1.0)          ! dimensionless
     call g_tracer_add_param('smz_ipa_lgp',zoo(1)%ipa_lgp, 0.0)          ! dimensionless
     call g_tracer_add_param('smz_ipa_diaz',zoo(1)%ipa_diaz,0.0)         ! dimensionless
     call g_tracer_add_param('smz_ipa_smz',zoo(1)%ipa_smz, 0.0)          ! dimensionless
@@ -5790,120 +5804,128 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('smz_ipa_lgz',zoo(1)%ipa_lgz, 0.0)          ! dimensionless
     call g_tracer_add_param('smz_ipa_smt',zoo(1)%ipa_smt, 0.0)          ! dimensionless
     call g_tracer_add_param('smz_ipa_lgt',zoo(1)%ipa_lgt, 0.0)          ! dimensionless
-    call g_tracer_add_param('smz_ipa_bact',zoo(1)%ipa_bact,0.25)         ! dimensionless
+    call g_tracer_add_param('smz_ipa_bact',zoo(1)%ipa_bact,0.25)        ! dimensionless
     call g_tracer_add_param('smz_ipa_det',zoo(1)%ipa_det, 0.0)          ! dimensionless
     ! innate prey availability for medium zooplankton
-    call g_tracer_add_param('mdz_ipa_smp',zoo(2)%ipa_smp, 0.0)    ! dimensionless
+    call g_tracer_add_param('mdz_ipa_smp',zoo(2)%ipa_smp, 0.0)          ! dimensionless
     call g_tracer_add_param('mdz_ipa_lgp',zoo(2)%ipa_lgp, 1.0)          ! dimensionless
     call g_tracer_add_param('mdz_ipa_diaz',zoo(2)%ipa_diaz,1.0)         ! dimensionless
     call g_tracer_add_param('mdz_ipa_smz',zoo(2)%ipa_smz, 1.0)          ! dimensionless
     call g_tracer_add_param('mdz_ipa_mdz',zoo(2)%ipa_mdz, 0.0)          ! dimensionless
     call g_tracer_add_param('mdz_ipa_lgz',zoo(2)%ipa_lgz, 0.0)          ! dimensionless
     call g_tracer_add_param('mdz_ipa_smt',zoo(2)%ipa_smt, 1.0)          ! dimensionless
-    call g_tracer_add_param('mdz_ipa_lgt',zoo(2)%ipa_lgt, 0.75)          ! dimensionless
+    call g_tracer_add_param('mdz_ipa_lgt',zoo(2)%ipa_lgt, 0.75)         ! dimensionless
     call g_tracer_add_param('mdz_ipa_bact',zoo(2)%ipa_bact, 0.0)        ! dimensionless
     call g_tracer_add_param('mdz_ipa_det',zoo(2)%ipa_det, 0.0)          ! dimensionless
     ! innate prey availability for large predatory zooplankton/krill
-    call g_tracer_add_param('lgz_ipa_smp',zoo(3)%ipa_smp, 0.0)   ! dimensionless
-    call g_tracer_add_param('lgz_ipa_lgp',zoo(3)%ipa_lgp, 1.0)         ! dimensionless
-    call g_tracer_add_param('lgz_ipa_diaz',zoo(3)%ipa_diaz, 1.0)       ! dimensionless
-    call g_tracer_add_param('lgz_ipa_smz',zoo(3)%ipa_smz, 0.0)         ! dimensionless
-    call g_tracer_add_param('lgz_ipa_mdz',zoo(3)%ipa_mdz, 1.0)         ! dimensionless
-    call g_tracer_add_param('lgz_ipa_lgz',zoo(3)%ipa_lgz, 0.0)         ! dimensionless
+    call g_tracer_add_param('lgz_ipa_smp',zoo(3)%ipa_smp, 0.0)          ! dimensionless
+    call g_tracer_add_param('lgz_ipa_lgp',zoo(3)%ipa_lgp, 1.0)          ! dimensionless
+    call g_tracer_add_param('lgz_ipa_diaz',zoo(3)%ipa_diaz, 1.0)        ! dimensionless
+    call g_tracer_add_param('lgz_ipa_smz',zoo(3)%ipa_smz, 0.0)          ! dimensionless
+    call g_tracer_add_param('lgz_ipa_mdz',zoo(3)%ipa_mdz, 1.0)          ! dimensionless
+    call g_tracer_add_param('lgz_ipa_lgz',zoo(3)%ipa_lgz, 0.0)          ! dimensionless
     call g_tracer_add_param('lgz_ipa_smt',zoo(3)%ipa_smt, 1.0)          ! dimensionless
     call g_tracer_add_param('lgz_ipa_lgt',zoo(3)%ipa_lgt, 1.0)          ! dimensionless
-    call g_tracer_add_param('lgz_ipa_bact',zoo(3)%ipa_bact, 0.0)       ! dimensionless
-    call g_tracer_add_param('lgz_ipa_det',zoo(3)%ipa_det, 0.0)         ! dimensionless
+    call g_tracer_add_param('lgz_ipa_bact',zoo(3)%ipa_bact, 0.0)        ! dimensionless
+    call g_tracer_add_param('lgz_ipa_det',zoo(3)%ipa_det, 0.0)          ! dimensionless
     ! innate prey availability for small tunicates (appendicularians)
-    call g_tracer_add_param('smt_ipa_smp',zoo(4)%ipa_smp, 1.0)   ! dimensionless
+    call g_tracer_add_param('smt_ipa_smp',zoo(4)%ipa_smp, 1.0)          ! dimensionless
     call g_tracer_add_param('smt_ipa_lgp',zoo(4)%ipa_lgp, 0.25)         ! dimensionless
-    call g_tracer_add_param('smt_ipa_diaz',zoo(4)%ipa_diaz, 1.0)       ! dimensionless
-    call g_tracer_add_param('smt_ipa_smz',zoo(4)%ipa_smz, 0.0)         ! dimensionless
-    call g_tracer_add_param('smt_ipa_mdz',zoo(4)%ipa_mdz, 0.0)         ! dimensionless
-    call g_tracer_add_param('smt_ipa_lgz',zoo(4)%ipa_lgz, 0.0)         ! dimensionless
+    call g_tracer_add_param('smt_ipa_diaz',zoo(4)%ipa_diaz, 1.0)        ! dimensionless
+    call g_tracer_add_param('smt_ipa_smz',zoo(4)%ipa_smz, 0.0)          ! dimensionless
+    call g_tracer_add_param('smt_ipa_mdz',zoo(4)%ipa_mdz, 0.0)          ! dimensionless
+    call g_tracer_add_param('smt_ipa_lgz',zoo(4)%ipa_lgz, 0.0)          ! dimensionless
     call g_tracer_add_param('smt_ipa_smt',zoo(4)%ipa_smt, 0.0)          ! dimensionless
     call g_tracer_add_param('smt_ipa_lgt',zoo(4)%ipa_lgt, 0.0)          ! dimensionless
-    call g_tracer_add_param('smt_ipa_bact',zoo(4)%ipa_bact, 1.0)       ! dimensionless
-    call g_tracer_add_param('smt_ipa_det',zoo(4)%ipa_det, 0.0)         ! dimensionless
+    call g_tracer_add_param('smt_ipa_bact',zoo(4)%ipa_bact, 1.0)        ! dimensionless
+    call g_tracer_add_param('smt_ipa_det',zoo(4)%ipa_det, 0.0)          ! dimensionless
     ! innate prey availability for large tunicates (salps)
-    call g_tracer_add_param('lgt_ipa_smp',zoo(5)%ipa_smp, 1.0)   ! dimensionless
+    call g_tracer_add_param('lgt_ipa_smp',zoo(5)%ipa_smp, 1.0)          ! dimensionless
     call g_tracer_add_param('lgt_ipa_lgp',zoo(5)%ipa_lgp, 0.25)         ! dimensionless
-    call g_tracer_add_param('lgt_ipa_diaz',zoo(5)%ipa_diaz, 1.0)       ! dimensionless
-    call g_tracer_add_param('lgt_ipa_smz',zoo(5)%ipa_smz, 1.0)         ! dimensionless
-    call g_tracer_add_param('lgt_ipa_mdz',zoo(5)%ipa_mdz, 0.0)         ! dimensionless
-    call g_tracer_add_param('lgt_ipa_lgz',zoo(5)%ipa_lgz, 0.0)         ! dimensionless
+    call g_tracer_add_param('lgt_ipa_diaz',zoo(5)%ipa_diaz, 1.0)        ! dimensionless
+    call g_tracer_add_param('lgt_ipa_smz',zoo(5)%ipa_smz, 1.0)          ! dimensionless
+    call g_tracer_add_param('lgt_ipa_mdz',zoo(5)%ipa_mdz, 0.0)          ! dimensionless
+    call g_tracer_add_param('lgt_ipa_lgz',zoo(5)%ipa_lgz, 0.0)          ! dimensionless
     call g_tracer_add_param('lgt_ipa_smt',zoo(5)%ipa_smt, 0.0)          ! dimensionless
     call g_tracer_add_param('lgt_ipa_lgt',zoo(5)%ipa_lgt, 0.0)          ! dimensionless
-    call g_tracer_add_param('lgt_ipa_bact',zoo(5)%ipa_bact, 0.5)       ! dimensionless
-    call g_tracer_add_param('lgt_ipa_det',zoo(5)%ipa_det, 0.0)         ! dimensionless
-
+    call g_tracer_add_param('lgt_ipa_bact',zoo(5)%ipa_bact, 0.5)        ! dimensionless
+    call g_tracer_add_param('lgt_ipa_det',zoo(5)%ipa_det, 0.0)          ! dimensionless
     !
     !----------------------------------------------------------------------
     ! Zooplankton bioenergetics
     !----------------------------------------------------------------------
     !
-    call g_tracer_add_param('gge_max_smz',zoo(1)%gge_max, 0.4)                   ! dimensionless
-    call g_tracer_add_param('gge_max_mdz',zoo(2)%gge_max, 0.4)                   ! dimensionless
-    call g_tracer_add_param('gge_max_lgz',zoo(3)%gge_max, 0.4)                   ! dimensionless
-    call g_tracer_add_param('gge_max_smt',zoo(4)%gge_max, 0.4)                   ! dimensionless
-    call g_tracer_add_param('gge_max_lgt',zoo(5)%gge_max, 0.4)                   ! dimensionless
-    call g_tracer_add_param('bresp_smz',zoo(1)%bresp, 0.9*0.020 / sperd)        ! s-1
-    call g_tracer_add_param('bresp_mdz',zoo(2)%bresp, 0.008 / sperd)        ! s-1
-    call g_tracer_add_param('bresp_lgz',zoo(3)%bresp, 0.0032 / sperd)       ! s-1
-    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.05 / sperd)         ! s-1
-    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.03 / sperd)         ! s-1
-    !
-    !----------------------------------------------------------------------
-    ! Bacterial bioenergetics
-    !----------------------------------------------------------------------
-    !
-    call g_tracer_add_param('gge_max_bact',bact(1)%gge_max,0.4)              ! dimensionless
-    call g_tracer_add_param('bresp_bact',bact(1)%bresp, 0.0075/sperd)         ! s-1
+    call g_tracer_add_param('bresp_smz',zoo(1)%bresp, 0.9*0.020 / sperd)         ! s-1
+    call g_tracer_add_param('bresp_mdz',zoo(2)%bresp, 0.008 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_lgz',zoo(3)%bresp, 0.0032 / sperd)            ! s-1
+    call g_tracer_add_param('bresp_smt',zoo(4)%bresp, 0.05 / sperd)             ! s-1
+    call g_tracer_add_param('bresp_lgt',zoo(5)%bresp, 0.03 / sperd)             ! s-1
+    call g_tracer_add_param('phi_aresp_smz',zoo(1)%phi_aresp, 0.3)               ! dimensionless
+    call g_tracer_add_param('phi_aresp_mdz',zoo(2)%phi_aresp, 0.3)               ! dimensionless
+    call g_tracer_add_param('phi_aresp_lgz',zoo(3)%phi_aresp, 0.3)               ! dimensionless
+    call g_tracer_add_param('phi_aresp_smt',zoo(4)%phi_aresp, 0.3)               ! dimensionless
+    call g_tracer_add_param('phi_aresp_lgt',zoo(5)%phi_aresp, 0.3)               ! dimensionless
+    call g_tracer_add_param('assim_eff_max_smz',zoo(1)%assim_eff_max, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_mdz',zoo(2)%assim_eff_max, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_lgz',zoo(3)%assim_eff_max, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.65)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.65)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_smz',zoo(1)%assim_eff_min, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_mdz',zoo(2)%assim_eff_min, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_lgz',zoo(3)%assim_eff_min, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.3)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.3)       ! dimensionless
+    call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
+    call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
+    call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
+    call g_tracer_add_param('kae_smz',zoo(4)%kae, 1.0e-3)                        ! moles N kg-1
+    call g_tracer_add_param('kae_lgz',zoo(5)%kae, 1.0e-3)                        ! moles N kg-1
     !
     !----------------------------------------------------------------------
     ! Partitioning of zooplankton ingestion to other compartments
     !----------------------------------------------------------------------
     !
-    call g_tracer_add_param('phi_det_smz',zoo(1)%phi_det, 0.10)            ! dimensionless
-    call g_tracer_add_param('phi_det_mdz',zoo(2)%phi_det, 0.20)            ! dimensionless
-    call g_tracer_add_param('phi_det_lgz',zoo(3)%phi_det, 0.30)            ! dimensionless
-    call g_tracer_add_param('phi_det_smt',zoo(4)%phi_det, 0.30)            ! dimensionless
-    call g_tracer_add_param('phi_det_lgt',zoo(5)%phi_det, 0.30)            ! dimensionless
+    call g_tracer_add_param('phi_det_smz',zoo(1)%phi_det, 0.3)               ! dimensionless
+    call g_tracer_add_param('phi_det_mdz',zoo(2)%phi_det, 0.7)               ! dimensionless
+    call g_tracer_add_param('phi_det_lgz',zoo(3)%phi_det, 1.0)               ! dimensionless
+    call g_tracer_add_param('phi_det_smt',zoo(4)%phi_det, 0.7)               ! dimensionless
+    call g_tracer_add_param('phi_det_lgt',zoo(5)%phi_det, 1.0)               ! dimensionless
 
-    call g_tracer_add_param('phi_ldon_mdz',zoo(2)%phi_ldon, 0.7*0.10)      ! dimensionless
-    call g_tracer_add_param('phi_ldon_lgz',zoo(3)%phi_ldon, 0.7*0.0)       ! dimensionless
-    call g_tracer_add_param('phi_ldon_smt',zoo(4)%phi_ldon, 0.7*0.10)      ! dimensionless
-    call g_tracer_add_param('phi_ldon_lgt',zoo(5)%phi_ldon, 0.7*0.0)       ! dimensionless
+    call g_tracer_add_param('phi_ldon_smz',zoo(1)%phi_ldon, 0.7*0.7)         ! dimensionless
+    call g_tracer_add_param('phi_ldon_mdz',zoo(2)%phi_ldon, 0.7*0.3)         ! dimensionless
+    call g_tracer_add_param('phi_ldon_lgz',zoo(3)%phi_ldon, 0.7*0.0)         ! dimensionless
+    call g_tracer_add_param('phi_ldon_smt',zoo(4)%phi_ldon, 0.7*0.3)         ! dimensionless
+    call g_tracer_add_param('phi_ldon_lgt',zoo(5)%phi_ldon, 0.7*0.0)         ! dimensionless
 
-    call g_tracer_add_param('phi_ldop_smz',zoo(1)%phi_ldop, 0.65*0.20)     ! dimensionless
-    call g_tracer_add_param('phi_ldop_mdz',zoo(2)%phi_ldop, 0.65*0.10)     ! dimensionless
-    call g_tracer_add_param('phi_ldop_lgz',zoo(3)%phi_ldop, 0.65*0.0)      ! dimensionless
-    call g_tracer_add_param('phi_ldop_smt',zoo(4)%phi_ldop, 0.65*0.10)     ! dimensionless
-    call g_tracer_add_param('phi_ldop_lgt',zoo(5)%phi_ldop, 0.65*0.0)     ! dimensionless
+    call g_tracer_add_param('phi_ldop_smz',zoo(1)%phi_ldop, 0.65*0.7)        ! dimensionless
+    call g_tracer_add_param('phi_ldop_mdz',zoo(2)%phi_ldop, 0.65*0.3)        ! dimensionless
+    call g_tracer_add_param('phi_ldop_lgz',zoo(3)%phi_ldop, 0.65*0.0)        ! dimensionless
+    call g_tracer_add_param('phi_ldop_smt',zoo(4)%phi_ldop, 0.65*0.3)        ! dimensionless
+    call g_tracer_add_param('phi_ldop_lgt',zoo(5)%phi_ldop, 0.65*0.0)        ! dimensionless
 
-    call g_tracer_add_param('phi_srdon_smz',zoo(1)%phi_srdon, 0.1*0.20)    ! dimensionless
-    call g_tracer_add_param('phi_srdon_mdz',zoo(2)%phi_srdon, 0.1*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_srdon_lgz',zoo(3)%phi_srdon, 0.1*0.0)     ! dimensionless
-    call g_tracer_add_param('phi_srdon_smt',zoo(4)%phi_srdon, 0.1*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_srdon_lgt',zoo(5)%phi_srdon, 0.1*0.0)     ! dimensionless
+    call g_tracer_add_param('phi_srdon_smz',zoo(1)%phi_srdon, 0.1*0.7)       ! dimensionless
+    call g_tracer_add_param('phi_srdon_mdz',zoo(2)%phi_srdon, 0.1*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_srdon_lgz',zoo(3)%phi_srdon, 0.1*0.0)       ! dimensionless
+    call g_tracer_add_param('phi_srdon_smt',zoo(4)%phi_srdon, 0.1*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_srdon_lgt',zoo(5)%phi_srdon, 0.1*0.0)       ! dimensionless
 
-    call g_tracer_add_param('phi_srdop_smz',zoo(1)%phi_srdop, 0.15*0.20)   ! dimensionless
-    call g_tracer_add_param('phi_srdop_mdz',zoo(2)%phi_srdop, 0.15*0.10)   ! dimensionless
-    call g_tracer_add_param('phi_srdop_lgz',zoo(3)%phi_srdop, 0.15*0.0)    ! dimensionless
-    call g_tracer_add_param('phi_srdop_smt',zoo(4)%phi_srdop, 0.15*0.10)   ! dimensionless
-    call g_tracer_add_param('phi_srdop_lgt',zoo(5)%phi_srdop, 0.15*0.0)    ! dimensionless
+    call g_tracer_add_param('phi_srdop_smz',zoo(1)%phi_srdop, 0.15*0.7)      ! dimensionless
+    call g_tracer_add_param('phi_srdop_mdz',zoo(2)%phi_srdop, 0.15*0.3)      ! dimensionless
+    call g_tracer_add_param('phi_srdop_lgz',zoo(3)%phi_srdop, 0.15*0.0)      ! dimensionless
+    call g_tracer_add_param('phi_srdop_smt',zoo(4)%phi_srdop, 0.15*0.3)      ! dimensionless
+    call g_tracer_add_param('phi_srdop_lgt',zoo(5)%phi_srdop, 0.15*0.0)      ! dimensionless
 
-    call g_tracer_add_param('phi_sldon_smz',zoo(1)%phi_sldon, 0.2*0.20)    ! dimensionless
-    call g_tracer_add_param('phi_sldon_mdz',zoo(2)%phi_sldon, 0.2*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_sldon_lgz',zoo(3)%phi_sldon, 0.2*0.0)     ! dimensionless
-    call g_tracer_add_param('phi_sldon_smt',zoo(4)%phi_sldon, 0.2*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_sldon_lgt',zoo(5)%phi_sldon, 0.2*0.0)     ! dimensionless
+    call g_tracer_add_param('phi_sldon_smz',zoo(1)%phi_sldon, 0.2*0.7)       ! dimensionless
+    call g_tracer_add_param('phi_sldon_mdz',zoo(2)%phi_sldon, 0.2*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_sldon_lgz',zoo(3)%phi_sldon, 0.2*0.0)       ! dimensionless
+    call g_tracer_add_param('phi_sldon_smt',zoo(4)%phi_sldon, 0.2*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_sldon_lgt',zoo(5)%phi_sldon, 0.2*0.0)       ! dimensionless
 
-    call g_tracer_add_param('phi_sldop_smz',zoo(1)%phi_sldop, 0.2*0.20)    ! dimensionless
-    call g_tracer_add_param('phi_sldop_mdz',zoo(2)%phi_sldop, 0.2*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_sldop_lgz',zoo(3)%phi_sldop, 0.2*0.0)     ! dimensionless
-    call g_tracer_add_param('phi_sldop_smt',zoo(4)%phi_sldop, 0.2*0.10)    ! dimensionless
-    call g_tracer_add_param('phi_sldop_lgt',zoo(5)%phi_sldop, 0.2*0.0)     ! dimensionless
+    call g_tracer_add_param('phi_sldop_smz',zoo(1)%phi_sldop, 0.2*0.7)       ! dimensionless
+    call g_tracer_add_param('phi_sldop_mdz',zoo(2)%phi_sldop, 0.2*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_sldop_lgz',zoo(3)%phi_sldop, 0.2*0.0)       ! dimensionless
+    call g_tracer_add_param('phi_sldop_smt',zoo(4)%phi_sldop, 0.2*0.3)       ! dimensionless
+    call g_tracer_add_param('phi_sldop_lgt',zoo(5)%phi_sldop, 0.2*0.0)       ! dimensionless
 
     call g_tracer_add_param('phi_nh4_smz',zoo(1)%phi_nh4, 0.30)            ! dimensionless
     call g_tracer_add_param('phi_nh4_mdz',zoo(2)%phi_nh4, 0.30)            ! dimensionless
@@ -6895,7 +6917,8 @@ write (stdlogunit, generic_COBALT_nml)
     real,dimension(1:NUM_PREY) :: hp_ipa_vec,hp_pa_vec,hp_ingest_vec
     real,dimension(1:NUM_PREY) :: prey_vec,prey_p2n_vec,prey_fe2n_vec,prey_si2n_vec
     real,dimension(1:NUM_ZOO)  :: tot_prey
-    real :: tot_prey_hp, sw_fac_denom, assim_eff
+    real :: tot_prey_hp, sw_fac_denom, basal_respiration, lim_nut_n_ingestion
+    real :: min_cold_lim_temp, cold_lim_max_value, cold_lim_ktemp
     real :: bact_uptake_ratio, vmax_bact, growth_ratio
     real :: fpoc_btm, log_fpoc_btm
     real :: fe_salt
@@ -7397,28 +7420,38 @@ write (stdlogunit, generic_COBALT_nml)
 !
     !
     ! calculate an effective maximum ldon uptake rate (at 0 deg. C) for bacteria
-    ! from specified values of bact(1)%gge_max, bact(1)%mu_max and bact(1)%bresp
+    ! from specified values of bact(1)%phi_aresp, bact(1)%mu_max and bact(1)%bresp
     !
 
     call mpp_clock_begin(id_clock_bacteria_growth)
-    vmax_bact = (1.0/bact(1)%gge_max)*(bact(1)%mu_max + bact(1)%bresp)
+    vmax_bact = (1.0/(bact(1)%assim_eff-bact(1)%phi_aresp))*(bact(1)%mu_max + bact(1)%bresp)
     do k = 1, nk  ; do j = jsc, jec ; do i = isc, iec   !{
+       ! in addition to temperature and oxygen limitation, bacteria are also limited by
+       ! available organic substrate
        bact(1)%temp_lim(i,j,k) = exp(bact(1)%ktemp*Temp(i,j,k))
        bact(1)%ldonlim(i,j,k) = cobalt%f_ldon(i,j,k)/(bact(1)%k_ldon + cobalt%f_ldon(i,j,k))
        bact(1)%o2lim(i,j,k) = max(cobalt%f_o2(i,j,k),cobalt%o2_min)/  &
                               (cobalt%k_o2 + max(cobalt%f_o2(i,j,k),cobalt%o2_min))
+
+       ! uptake and basal respiration
        bact(1)%juptake_ldon(i,j,k) = vmax_bact*bact(1)%temp_lim(i,j,k)*bact(1)%ldonlim(i,j,k)* &
                                      bact(1)%o2lim(i,j,k)*bact(1)%f_n(i,j,k)
        bact_uptake_ratio = ( cobalt%f_ldop(i,j,k)/max(cobalt%f_ldon(i,j,k),epsln) )
        bact(1)%juptake_ldop(i,j,k) = bact(1)%juptake_ldon(i,j,k)*bact_uptake_ratio
-       ! calculate bacteria production if N-limited, adjust down if P-limited
-       bact(1)%jprod_n(i,j,k) = bact(1)%gge_max*bact(1)%juptake_ldon(i,j,k) - &
-          bact(1)%f_n(i,j,k)/(cobalt%refuge_conc + bact(1)%f_n(i,j,k)) *      &
-          bact(1)%temp_lim(i,j,k)*bact(1)%bresp*bact(1)%f_n(i,j,k)
-       bact(1)%jprod_n(i,j,k) = min(bact(1)%jprod_n(i,j,k), &
-                                    bact(1)%juptake_ldop(i,j,k)/bact(1)%q_p_2_n)
-       ! remineralization of oragnic N to nh4 = difference between uptake and production
-       bact(1)%jprod_nh4(i,j,k) = bact(1)%juptake_ldon(i,j,k) - max(bact(1)%jprod_n(i,j,k),0.0)
+
+       basal_respiration = bact(1)%f_n(i,j,k)/(cobalt%refuge_conc + bact(1)%f_n(i,j,k)) * &
+                           bact(1)%temp_lim(i,j,k)*bact(1)%bresp*bact(1)%f_n(i,j,k)
+
+       ! calculate bacteria uptake based on the limiting nutrient
+       lim_nut_n_ingestion = min(bact(1)%juptake_ldon(i,j,k), &
+                                 bact(1)%juptake_ldop(i,j,k)/bact(1)%q_p_2_n)
+
+       bact(1)%jprod_n(i,j,k) = (bact(1)%assim_eff*lim_nut_n_ingestion) - basal_respiration - &
+                                (bact(1)%phi_aresp*lim_nut_n_ingestion)
+
+       ! remineralization of oragnic N to nh4 is a fraction of the uptake plus basal respiration
+       ! or just the assimilated uptake minus the production
+       bact(1)%jprod_nh4(i,j,k) =(bact(1)%assim_eff*bact(1)%juptake_ldon(i,j,k)) - max(bact(1)%jprod_n(i,j,k),0.0)
        cobalt%jprod_nh4(i,j,k) = cobalt%jprod_nh4(i,j,k) + bact(1)%jprod_nh4(i,j,k)
 
        if (cobalt%f_o2(i,j,k) .gt. cobalt%o2_min) then  !{
@@ -7557,6 +7590,13 @@ write (stdlogunit, generic_COBALT_nml)
        cobalt%hp_temp_lim(i,j,k) = exp(cobalt%ktemp_hp*Temp(i,j,k))
        cobalt%hp_o2lim(i,j,k) = max((cobalt%f_o2(i,j,k) - cobalt%o2_min),0.0)/ &
                                 (cobalt%k_o2 + max(cobalt%f_o2(i,j,k)-cobalt%o2_min,0.0))
+
+       ! cold temperature limitation for Salps
+       cold_lim_max_value = 1.0
+       min_cold_lim_temp = -2.0
+       cold_lim_ktemp = 2.2
+       zoo(5)%cold_lim(i,j,k) = cold_lim_max_value * ((Temp(i,j,k) - min_cold_lim_temp)**2.0 / &
+                                ((Temp(i,j,k) - min_cold_lim_temp)**2.0 + cold_lim_ktemp**2.0))
 
        ! Prey vectors for ingestion and loss calculations
        ! (note: ordering of phytoplankton must be consistent with
@@ -7787,15 +7827,20 @@ write (stdlogunit, generic_COBALT_nml)
        tot_prey(m) = pa_matrix(m,1)*prey_vec(1) + pa_matrix(m,2)*prey_vec(2) + &
                      pa_matrix(m,3)*prey_vec(3) + pa_matrix(m,4)*prey_vec(4) + &
                      pa_matrix(m,5)*prey_vec(5)
-       ingest_matrix(m,1) = zoo(m)%temp_lim(i,j,k)*zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
+       ingest_matrix(m,1) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
+                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,1)*prey_vec(1)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       ingest_matrix(m,2) = zoo(m)%temp_lim(i,j,k)*zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
+       ingest_matrix(m,2) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
+                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,2)*prey_vec(2)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       ingest_matrix(m,3) = zoo(m)%temp_lim(i,j,k)*zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
+       ingest_matrix(m,3) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
+                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,3)*prey_vec(3)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       ingest_matrix(m,4) = zoo(m)%temp_lim(i,j,k)*zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
+       ingest_matrix(m,4) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
+                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,4)*prey_vec(4)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
-       ingest_matrix(m,5) = zoo(m)%temp_lim(i,j,k)*zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
+       ingest_matrix(m,5) = zoo(m)%temp_lim(i,j,k)*zoo(m)%cold_lim(i,j,k)* &
+                     zoo(m)%o2lim(i,j,k)*zoo(m)%imax* &
                      pa_matrix(m,5)*prey_vec(5)*zoo(m)%f_n(i,j,k)/(zoo(m)%ki+tot_prey(m))
        zoo(m)%jingest_n(i,j,k) = ingest_matrix(m,1) + ingest_matrix(m,2) + &
                                  ingest_matrix(m,3) + ingest_matrix(m,4) + &
@@ -7816,6 +7861,14 @@ write (stdlogunit, generic_COBALT_nml)
           ingest_matrix(3,1) + ingest_matrix(3,2) + ingest_matrix(3,3) + &
           ingest_matrix(4,1) + ingest_matrix(4,2) + ingest_matrix(4,3) + &
           ingest_matrix(5,1) + ingest_matrix(5,2) + ingest_matrix(5,3)
+
+
+       ! Calculate assimilation efficiency.
+       ! Allows for AE to vary between max and min values with a michaelis-menten functional form
+       do m = 1,NUM_ZOO
+          zoo(m)%assim_eff(i,j,k) = zoo(m)%assim_eff_max - ((zoo(m)%assim_eff_max - zoo(m)%assim_eff_min) * &
+                                 (tot_prey(m)/(zoo(m)%kae + tot_prey(m))))
+       enddo
 
        !
        ! Calculate losses to zooplankton
@@ -7973,16 +8026,16 @@ write (stdlogunit, generic_COBALT_nml)
        !
 
        do m = 1,NUM_ZOO
-           zoo(m)%jprod_ndet(i,j,k) = zoo(m)%phi_det*zoo(m)%jingest_n(i,j,k)
-           zoo(m)%jprod_pdet(i,j,k) = zoo(m)%phi_det*zoo(m)%jingest_p(i,j,k)
-           zoo(m)%jprod_sldon(i,j,k) = zoo(m)%phi_sldon*zoo(m)%jingest_n(i,j,k)
-           zoo(m)%jprod_ldon(i,j,k) = zoo(m)%phi_ldon*zoo(m)%jingest_n(i,j,k)
-           zoo(m)%jprod_srdon(i,j,k) = zoo(m)%phi_srdon*zoo(m)%jingest_n(i,j,k)
-           zoo(m)%jprod_sldop(i,j,k) = zoo(m)%phi_sldop*zoo(m)%jingest_p(i,j,k)
-           zoo(m)%jprod_ldop(i,j,k) = zoo(m)%phi_ldop*zoo(m)%jingest_p(i,j,k)
-           zoo(m)%jprod_srdop(i,j,k) = zoo(m)%phi_srdop*zoo(m)%jingest_p(i,j,k)
-           zoo(m)%jprod_fedet(i,j,k) = zoo(m)%phi_det*zoo(m)%jingest_fe(i,j,k)
-           zoo(m)%jprod_sidet(i,j,k) = zoo(m)%phi_det*zoo(m)%jingest_sio2(i,j,k)
+           zoo(m)%jprod_ndet(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_n(i,j,k)
+           zoo(m)%jprod_pdet(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_p(i,j,k)
+           zoo(m)%jprod_sldon(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_sldon*zoo(m)%jingest_n(i,j,k)
+           zoo(m)%jprod_ldon(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_ldon*zoo(m)%jingest_n(i,j,k)
+           zoo(m)%jprod_srdon(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_srdon*zoo(m)%jingest_n(i,j,k)
+           zoo(m)%jprod_sldop(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_sldop*zoo(m)%jingest_p(i,j,k)
+           zoo(m)%jprod_ldop(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_ldop*zoo(m)%jingest_p(i,j,k)
+           zoo(m)%jprod_srdop(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_srdop*zoo(m)%jingest_p(i,j,k)
+           zoo(m)%jprod_fedet(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_fe(i,j,k)
+           zoo(m)%jprod_sidet(i,j,k) = (1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_sio2(i,j,k)
 
 
            ! augment cumulative production with zooplankton terms
@@ -8071,37 +8124,28 @@ write (stdlogunit, generic_COBALT_nml)
        !
 
        do m = 1,NUM_ZOO
-          assim_eff = 1.0-zoo(m)%phi_det-zoo(m)%phi_ldon-zoo(m)%phi_sldon-zoo(m)%phi_srdon
-          zoo(m)%jprod_n(i,j,k) = zoo(m)%gge_max*zoo(m)%jingest_n(i,j,k) - &
-                                     zoo(m)%f_n(i,j,k)/(cobalt%refuge_conc + zoo(m)%f_n(i,j,k))* &
-                                     zoo(m)%temp_lim(i,j,k)*zoo(m)%bresp*zoo(m)%f_n(i,j,k)
-          zoo(m)%jprod_n(i,j,k) = min(zoo(m)%jprod_n(i,j,k), &
-                                      assim_eff*zoo(m)%jingest_p(i,j,k)/zoo(m)%q_p_2_n)
-
           !
-          ! Ingested material that does not go to zooplankton production, detrital production
-          ! or production of dissolved organic material is excreted as nh4 or po4.  If production
-          ! is negative, zooplankton are lost to large detritus
+          ! Total excretion (as either NH4 or PO4) is a sum of the basal and feeding-based
+          ! respiration rates. Basal respiration is a function of biomass, whereas
+          ! feeding-based respiration depends on ingestion. If respiration rates exceeds
+          ! the assimilated ingestion, then production becomes negative and results in zooplankton
+          ! mortality.
           !
-          if (zoo(m)%jprod_n(i,j,k) .gt. 0.0) then
-             zoo(m)%jprod_nh4(i,j,k) =  zoo(m)%jingest_n(i,j,k) - zoo(m)%jprod_ndet(i,j,k) -  &
-                                        zoo(m)%jprod_n(i,j,k) - zoo(m)%jprod_ldon(i,j,k) - &
-                                        zoo(m)%jprod_sldon(i,j,k) - zoo(m)%jprod_srdon(i,j,k)
-             zoo(m)%jprod_po4(i,j,k) =  zoo(m)%jingest_p(i,j,k) - zoo(m)%jprod_pdet(i,j,k) - &
-                                        zoo(m)%jprod_n(i,j,k)*zoo(m)%q_p_2_n - zoo(m)%jprod_ldop(i,j,k) -  &
-                                        zoo(m)%jprod_sldop(i,j,k) - zoo(m)%jprod_srdop(i,j,k)
-          else
-             ! None of the ingestion material goes to zooplankton production
-             zoo(m)%jprod_nh4(i,j,k) =  zoo(m)%jingest_n(i,j,k) - zoo(m)%jprod_ndet(i,j,k) - &
-                                        zoo(m)%jprod_ldon(i,j,k) - zoo(m)%jprod_sldon(i,j,k) - &
-                                        zoo(m)%jprod_srdon(i,j,k)
-             zoo(m)%jprod_po4(i,j,k) =  zoo(m)%jingest_p(i,j,k) - zoo(m)%jprod_pdet(i,j,k) - &
-                                        zoo(m)%jprod_ldop(i,j,k) - zoo(m)%jprod_sldop(i,j,k) - &
-                                        zoo(m)%jprod_srdop(i,j,k)
+          basal_respiration = zoo(m)%f_n(i,j,k)/(cobalt%refuge_conc + zoo(m)%f_n(i,j,k))* &
+                              zoo(m)%temp_lim(i,j,k)*zoo(m)%bresp*zoo(m)%f_n(i,j,k)
+          lim_nut_n_ingestion = min(zoo(m)%jingest_n(i,j,k), zoo(m)%jingest_p(i,j,k)/zoo(m)%q_p_2_n)
 
+          zoo(m)%jprod_n(i,j,k) = (zoo(m)%assim_eff(i,j,k)*lim_nut_n_ingestion) - basal_respiration - &
+                                  (zoo(m)%phi_aresp*lim_nut_n_ingestion)
+
+          zoo(m)%jprod_nh4(i,j,k) =  zoo(m)%assim_eff(i,j,k)*zoo(m)%jingest_n(i,j,k) - &
+                                     max(zoo(m)%jprod_n(i,j,k),0.0)
+          zoo(m)%jprod_po4(i,j,k) =  zoo(m)%assim_eff(i,j,k)*zoo(m)%jingest_p(i,j,k) - &
+                                     max(zoo(m)%jprod_n(i,j,k)*zoo(m)%q_p_2_n,0.0)
+
+          if (zoo(m)%jprod_n(i,j,k) .lt. 0.0) then
              ! The negative production (i.e., mortality) is lost to large detritus. Update values
              ! for zooplankton and for total.
-
              zoo(m)%jprod_ndet(i,j,k) = zoo(m)%jprod_ndet(i,j,k) - zoo(m)%jprod_n(i,j,k)
              zoo(m)%jprod_pdet(i,j,k) = zoo(m)%jprod_pdet(i,j,k) - zoo(m)%jprod_n(i,j,k)*zoo(m)%q_p_2_n
              cobalt%jprod_ndet(i,j,k) = cobalt%jprod_ndet(i,j,k) - zoo(m)%jprod_n(i,j,k)
@@ -8117,13 +8161,15 @@ write (stdlogunit, generic_COBALT_nml)
           ! Any ingested iron that is not allocated to detritus is routed back to the
           ! dissolved pool.
           !
-          zoo(m)%jprod_fed(i,j,k) = (1.0 - zoo(m)%phi_det)*zoo(m)%jingest_fe(i,j,k)
+          zoo(m)%jprod_fed(i,j,k) = zoo(m)%jingest_fe(i,j,k) - &
+                                    ((1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_fe(i,j,k))
           cobalt%jprod_fed(i,j,k) = cobalt%jprod_fed(i,j,k) + zoo(m)%jprod_fed(i,j,k)
           !
           ! Any ingested opal that is not allocated to detritus is assumed to undergo
           ! rapid dissolution to dissolved silica
           !
-          zoo(m)%jprod_sio4(i,j,k) = (1.0 - zoo(m)%phi_det)*zoo(m)%jingest_sio2(i,j,k)
+          zoo(m)%jprod_sio4(i,j,k) = zoo(m)%jingest_sio2(i,j,k) - &
+                                    ((1.0-zoo(m)%assim_eff(i,j,k))*zoo(m)%phi_det*zoo(m)%jingest_sio2(i,j,k))
           cobalt%jprod_sio4(i,j,k) = cobalt%jprod_sio4(i,j,k) + zoo(m)%jprod_sio4(i,j,k)
 
        enddo !} m
@@ -8185,11 +8231,12 @@ write (stdlogunit, generic_COBALT_nml)
     !
 
     do k = 1, nk ; do j = jsc, jec ; do i = isc, iec   !{
-        cobalt%jprod_cadet_arag(i,j,k) = (zoo(2)%jzloss_n(i,j,k)*zoo(3)%phi_det + &
+        cobalt%jprod_cadet_arag(i,j,k) = (zoo(2)%jzloss_n(i,j,k)*((1.0-zoo(3)%assim_eff(i,j,k))*zoo(3)%phi_det) + &
                        (zoo(2)%jhploss_n(i,j,k) + zoo(3)%jhploss_n(i,j,k))*cobalt%hp_phi_det)* &
                        cobalt%ca_2_n_arag*min(cobalt%caco3_sat_max, max(0.0,cobalt%omega_arag(i,j,k) - 1.0)) + epsln
-        cobalt%jprod_cadet_calc(i,j,k) = (zoo(1)%jzloss_n(i,j,k)*zoo(2)%phi_det + &
-                       phyto(SMALL)%jzloss_n(i,j,k)*zoo(1)%phi_det + phyto(LARGE)%jzloss_n(i,j,k)*zoo(3)%phi_det + &
+        cobalt%jprod_cadet_calc(i,j,k) = (zoo(1)%jzloss_n(i,j,k)*((1.0-zoo(3)%assim_eff(i,j,k))*zoo(3)%phi_det) + &
+                       phyto(SMALL)%jzloss_n(i,j,k)*((1.0-zoo(1)%assim_eff(i,j,k))*zoo(1)%phi_det) + &
+                       phyto(LARGE)%jzloss_n(i,j,k)*((1.0-zoo(3)%assim_eff(i,j,k))*zoo(3)%phi_det) + &
                        phyto(SMALL)%jaggloss_n(i,j,k) + phyto(LARGE)%jaggloss_n(i,j,k))*cobalt%ca_2_n_calc* &
                        min(cobalt%caco3_sat_max, max(0.0, cobalt%omega_calc(i,j,k) - 1.0)) + epsln
     enddo; enddo ; enddo !} i,j,k
@@ -10144,6 +10191,14 @@ write (stdlogunit, generic_COBALT_nml)
             is_in=isc, js_in=jsc, ks_in=1,ie_in=iec, je_in=jec, ke_in=nk)
        if (zoo(n)%id_temp_lim .gt. 0)          &
             used = g_send_data(zoo(n)%id_temp_lim, zoo(n)%temp_lim,           &
+            model_time, rmask = grid_tmask,&
+            is_in=isc, js_in=jsc, ks_in=1,ie_in=iec, je_in=jec, ke_in=nk)
+       if (zoo(n)%id_cold_lim .gt. 0)          &
+            used = g_send_data(zoo(n)%id_cold_lim, zoo(n)%cold_lim,           &
+            model_time, rmask = grid_tmask,&
+            is_in=isc, js_in=jsc, ks_in=1,ie_in=iec, je_in=jec, ke_in=nk)
+       if (zoo(n)%id_assim_eff .gt. 0)          &
+            used = g_send_data(zoo(n)%id_assim_eff, zoo(n)%assim_eff,           &
             model_time, rmask = grid_tmask,&
             is_in=isc, js_in=jsc, ks_in=1,ie_in=iec, je_in=jec, ke_in=nk)
     enddo
@@ -12910,6 +12965,7 @@ write (stdlogunit, generic_COBALT_nml)
     !
     do n = 1, NUM_ZOO
        allocate(zoo(n)%f_n(isd:ied,jsd:jed,nk))           ; zoo(n)%f_n            = 0.0
+       allocate(zoo(n)%assim_eff(isd:ied,jsd:jed,nk))     ; zoo(n)%assim_eff      = 0.0
        allocate(zoo(n)%jzloss_n(isd:ied,jsd:jed,nk))      ; zoo(n)%jzloss_n       = 0.0
        allocate(zoo(n)%jzloss_p(isd:ied,jsd:jed,nk))      ; zoo(n)%jzloss_p       = 0.0
        allocate(zoo(n)%jhploss_n(isd:ied,jsd:jed,nk))     ; zoo(n)%jhploss_n      = 0.0
@@ -12935,6 +12991,7 @@ write (stdlogunit, generic_COBALT_nml)
        allocate(zoo(n)%jprod_n(isd:ied,jsd:jed,nk))      ; zoo(n)%jprod_n         = 0.0
        allocate(zoo(n)%o2lim(isd:ied,jsd:jed,nk))        ; zoo(n)%o2lim           = 0.0
        allocate(zoo(n)%temp_lim(isd:ied,jsd:jed,nk))      ; zoo(n)%temp_lim       = 0.0
+       allocate(zoo(n)%cold_lim(isd:ied,jsd:jed,nk))      ; zoo(n)%cold_lim       = 0.0
     enddo
 
     ! higher predator ingestion
@@ -13387,6 +13444,7 @@ write (stdlogunit, generic_COBALT_nml)
     ! zooplankton
     do n = 1, NUM_ZOO
        deallocate(zoo(n)%f_n)
+       deallocate(zoo(n)%assim_eff)
        deallocate(zoo(n)%jzloss_n)
        deallocate(zoo(n)%jzloss_p)
        deallocate(zoo(n)%jhploss_n)
@@ -13412,6 +13470,7 @@ write (stdlogunit, generic_COBALT_nml)
        deallocate(zoo(n)%jprod_n)
        deallocate(zoo(n)%o2lim)
        deallocate(zoo(n)%temp_lim)
+       deallocate(zoo(n)%cold_lim)
     enddo
 
     deallocate(cobalt%f_alk)
