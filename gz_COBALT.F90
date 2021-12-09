@@ -5800,7 +5800,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.25e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_smt',zoo(4)%ki, 2.7e-6)                       ! moles N kg-1
-    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 3.0e-6)                       ! moles N kg-1
+    call g_tracer_add_param('ki_lgt',zoo(5)%ki, 5.0e-6)                       ! moles N kg-1
     call g_tracer_add_param('ktemp_smz',zoo(1)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_mdz',zoo(2)%ktemp, 0.063)                   ! C-1
     call g_tracer_add_param('ktemp_lgz',zoo(3)%ktemp, 0.063)                   ! C-1
@@ -5921,7 +5921,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_smz',zoo(4)%kae, 1.0e-4)                      ! moles N kg-1
-    call g_tracer_add_param('kae_lgz',zoo(5)%kae, 1.0e-5)                      ! moles N kg-1
+    call g_tracer_add_param('kae_lgz',zoo(5)%kae, 5.0e-6)                      ! moles N kg-1
 
     call g_tracer_add_param('agg_smz',zoo(1)%agg, 0.0)                         ! s-1 (moles N kg)-1
     call g_tracer_add_param('agg_mdz',zoo(2)%agg, 0.0)                         ! s-1 (moles N kg)-1
