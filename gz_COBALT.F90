@@ -5868,13 +5868,13 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('assim_eff_max_smz',zoo(1)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_mdz',zoo(2)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_max_lgz',zoo(3)%assim_eff_max, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.6)       ! dimensionless
-    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.6)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_smt',zoo(4)%assim_eff_max, 0.7)       ! dimensionless
+    call g_tracer_add_param('assim_eff_max_lgt',zoo(5)%assim_eff_max, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_smz',zoo(1)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_mdz',zoo(2)%assim_eff_min, 0.7)       ! dimensionless
     call g_tracer_add_param('assim_eff_min_lgz',zoo(3)%assim_eff_min, 0.7)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.2)       ! dimensionless
-    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.2)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_smt',zoo(4)%assim_eff_min, 0.3)       ! dimensionless
+    call g_tracer_add_param('assim_eff_min_lgt',zoo(5)%assim_eff_min, 0.3)       ! dimensionless
     call g_tracer_add_param('kae_smz',zoo(1)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_mdz',zoo(2)%kae, 1.0e+10)                     ! moles N kg-1
     call g_tracer_add_param('kae_lgz',zoo(3)%kae, 1.0e+10)                     ! moles N kg-1
@@ -5964,10 +5964,10 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('hp_ipa_lgp',  cobalt%hp_ipa_lgp, 0.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_diaz', cobalt%hp_ipa_diaz, 0.0)        ! dimensionless
     call g_tracer_add_param('hp_ipa_smz',  cobalt%hp_ipa_smz, 0.0)         ! dimensionless
-    call g_tracer_add_param('hp_ipa_mdz',  cobalt%hp_ipa_mdz, 0.75)         ! dimensionless
+    call g_tracer_add_param('hp_ipa_mdz',  cobalt%hp_ipa_mdz, 1.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_lgz',  cobalt%hp_ipa_lgz, 1.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_smt',  cobalt%hp_ipa_smt, 1.0)          ! dimensionless
-    call g_tracer_add_param('hp_ipa_lgt',  cobalt%hp_ipa_lgt, 1.0)          ! dimensionless
+    call g_tracer_add_param('hp_ipa_lgt',  cobalt%hp_ipa_lgt, 0.75)          ! dimensionless
     call g_tracer_add_param('hp_ipa_bact', cobalt%hp_ipa_bact,0.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_det',  cobalt%hp_ipa_det, 0.0)         ! dimensionless
     call g_tracer_add_param('hp_phi_det',  cobalt%hp_phi_det, 0.35)        ! dimensionless
