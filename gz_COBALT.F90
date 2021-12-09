@@ -5755,8 +5755,8 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('imax_smz',zoo(1)%imax, 1.42 / sperd)          ! s-1
     call g_tracer_add_param('imax_mdz',zoo(2)%imax, 0.57 / sperd)              ! s-1
     call g_tracer_add_param('imax_lgz',zoo(3)%imax, 0.23 / sperd)              ! s-1
-    call g_tracer_add_param('imax_smz',zoo(4)%imax, 0.5*3.0 / sperd)               ! s-1 Berline et al. 2011
-    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 0.5*2.0 / sperd)               ! s-1 von Harbou et al. 2009
+    call g_tracer_add_param('imax_smz',zoo(4)%imax, 0.45*3.0 / sperd)               ! s-1 Berline et al. 2011
+    call g_tracer_add_param('imax_lgz',zoo(5)%imax, 0.45*2.0 / sperd)               ! s-1 von Harbou et al. 2009
     call g_tracer_add_param('ki_smz',zoo(1)%ki, 1.5e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_mdz',zoo(2)%ki, 1.5e-6)                       ! moles N kg-1
     call g_tracer_add_param('ki_lgz',zoo(3)%ki, 1.5e-6)                       ! moles N kg-1
@@ -5964,7 +5964,7 @@ write (stdlogunit, generic_COBALT_nml)
     call g_tracer_add_param('hp_ipa_lgp',  cobalt%hp_ipa_lgp, 0.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_diaz', cobalt%hp_ipa_diaz, 0.0)        ! dimensionless
     call g_tracer_add_param('hp_ipa_smz',  cobalt%hp_ipa_smz, 0.0)         ! dimensionless
-    call g_tracer_add_param('hp_ipa_mdz',  cobalt%hp_ipa_mdz, 1.0)         ! dimensionless
+    call g_tracer_add_param('hp_ipa_mdz',  cobalt%hp_ipa_mdz, 0.75)         ! dimensionless
     call g_tracer_add_param('hp_ipa_lgz',  cobalt%hp_ipa_lgz, 1.0)         ! dimensionless
     call g_tracer_add_param('hp_ipa_smt',  cobalt%hp_ipa_smt, 1.0)          ! dimensionless
     call g_tracer_add_param('hp_ipa_lgt',  cobalt%hp_ipa_lgt, 1.0)          ! dimensionless
