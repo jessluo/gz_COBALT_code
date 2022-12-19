@@ -3864,7 +3864,7 @@ write (stdlogunit, generic_COBALT_nml)
     cobalt%id_hp_jingest_n_100 = register_diag_field(package_name, vardesc_temp%name, axes(1:2),&
          init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
 
-    vardesc_temp = vardesc("jprod_ndet_hp_100","Higher predator nitrogen detritus prod. integral in upper 100m",'h','1','s','mol m-2 s-1','f')
+    vardesc_temp = vardesc("jprod_ndet_hp_100","Higher predator nitrogen detritus prod. integrtal in upper 100m",'h','1','s','mol m-2 s-1','f')
     cobalt%id_hp_jprod_ndet_100 = register_diag_field(package_name, vardesc_temp%name, axes(1:2),&
          init_time, vardesc_temp%longname,vardesc_temp%units, missing_value = missing_value1)
 
@@ -8426,9 +8426,9 @@ write (stdlogunit, generic_COBALT_nml)
        ! (did not track individual terms, just add to cumulative total)
        !
 
-       cobalt%jprod_ndet(i,j,k) = cobalt%jprod_ndet(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_n(i,j,k)
-       cobalt%jprod_pdet(i,j,k) = cobalt%jprod_pdet(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_p(i,j,k)
-       cobalt%jprod_fedet(i,j,k) = cobalt%jprod_fedet(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_fe(i,j,k)
+       cobalt%jprod_ndet_fast(i,j,k) = cobalt%jprod_ndet_fast(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_n(i,j,k)
+       cobalt%jprod_pdet_fast(i,j,k) = cobalt%jprod_pdet_fast(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_p(i,j,k)
+       cobalt%jprod_fedet_fast(i,j,k) = cobalt%jprod_fedet_fast(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_fe(i,j,k)
        cobalt%jprod_sidet(i,j,k) = cobalt%jprod_sidet(i,j,k) + cobalt%hp_phi_det*cobalt%hp_jingest_sio2(i,j,k)
    
        !
